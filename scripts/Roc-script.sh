@@ -49,7 +49,7 @@ function git_sparse_clone() {
   cd .. && rm -rf $repodir
 }
 
-# General.config / IPQ60XX.config 已启用：frp、wolplus、argon、aurora、passwall、openclash
+# General.config / IPQ60XX.config 已启用：frp、wolplus、argon、aurora、openclash
 # git_sparse_clone ariang https://github.com/laipeng668/packages net/ariang
 git_sparse_clone frp https://github.com/laipeng668/packages net/frp
 mv -f package/frp feeds/packages/net/frp
@@ -77,21 +77,44 @@ git clone --depth=1 https://github.com/sbwml/packages_lang_golang feeds/packages
 # git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki package/nikki
 # chmod +x package/luci-app-athena-led/root/etc/init.d/athena_led package/luci-app-athena-led/root/usr/sbin/athena-led
 
-### PassWall & OpenClash ###
+### OpenClash ###
 
-# 移除 OpenWrt Feeds 自带的核心库
-rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
-
-# 移除 OpenWrt Feeds 过时的LuCI版本
-rm -rf feeds/luci/applications/luci-app-passwall
+# 移除 OpenWrt Feeds 过时的 LuCI 版本
 rm -rf feeds/luci/applications/luci-app-openclash
-git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall package/luci-app-passwall
-# git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall2 package/luci-app-passwall2
 git clone --depth=1 https://github.com/vernesong/OpenClash package/luci-app-openclash
 
-# 清理 PassWall 的 chnlist 规则文件
-echo "baidu.com"  > package/luci-app-passwall/luci-app-passwall/root/usr/share/passwall/rules/chnlist
+# 根据编译目标预下载 Meta 内核，避免首次打开 LuCI 时手动下载
+# 默认配置：linux-arm64(armv8) / Master / Smart 停用
+OC_CORE_DIR="$(find package/luci-app-openclash -path '*/root/etc/openclash/core' -type d 2>/dev/null | head -1)"
+if [ -n "$OC_CORE_DIR" ]; then
+  OC_BRANCH='master'
+  if grep -q '^CONFIG_TARGET_x86=y' .config 2>/dev/null; then
+    OC_ARCH='linux-amd64'
+  elif grep -qE '^CONFIG_TARGET_(qualcommax|mediatek)=y' .config 2>/dev/null; then
+    OC_ARCH='linux-arm64'
+  elif grep -q '^CONFIG_TARGET_ramips=y' .config 2>/dev/null; then
+    OC_ARCH='linux-mipsle-hardfloat'
+  else
+    OC_ARCH='linux-arm64'
+  fi
+
+  OC_CORE_URL="https://cdn.jsdelivr.net/gh/vernesong/OpenClash@core/${OC_BRANCH}/meta/clash-${OC_ARCH}.tar.gz"
+  OC_CORE_FALLBACK="https://raw.githubusercontent.com/vernesong/OpenClash/core/${OC_BRANCH}/meta/clash-${OC_ARCH}.tar.gz"
+  if curl -fsSL --retry 3 --retry-delay 2 -o /tmp/clash_meta.tar.gz "$OC_CORE_URL" || \
+     curl -fsSL --retry 3 --retry-delay 2 -o /tmp/clash_meta.tar.gz "$OC_CORE_FALLBACK"; then
+    tar zxf /tmp/clash_meta.tar.gz -C /tmp
+    chmod +x /tmp/clash
+    mv -f /tmp/clash "$OC_CORE_DIR/clash_meta"
+    rm -f /tmp/clash_meta.tar.gz
+
+    OC_CONFIG="$(find package/luci-app-openclash -path '*/root/etc/config/openclash' -type f 2>/dev/null | head -1)"
+    if [ -f "$OC_CONFIG" ]; then
+      sed -i "s/^[[:space:]]*option core_version .*/	option core_version '${OC_ARCH}'/" "$OC_CONFIG"
+      sed -i "s/^[[:space:]]*option release_branch .*/	option release_branch '${OC_BRANCH}'/" "$OC_CONFIG"
+      sed -i "s/^[[:space:]]*option smart_enable .*/	option smart_enable '0'/" "$OC_CONFIG"
+    fi
+  fi
+fi
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a

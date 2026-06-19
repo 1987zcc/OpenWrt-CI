@@ -12,7 +12,7 @@
 - 默认用户：**`root`**
 - 默认密码：**`none`**（空密码）
 - 上游仓库：[Lang-Ke/OpenWrt-CI](https://github.com/Lang-Ke/OpenWrt-CI)（通过 GitHub **Sync fork** 保持更新）
-- 固件源码：[LiBwrt/openwrt-6.x](https://github.com/LiBwrt/openwrt-6.x)（`25.12-nss` 分支，支持 NSS 硬件加速）
+- 固件源码：[LiBwrt/LibWrt](https://github.com/LiBwrt/LibWrt)（`25.12-nss` 分支，支持 NSS 硬件加速）
 - 云编译参考：[haiibo/OpenWrt](https://github.com/haiibo/OpenWrt) · [视频教程](https://www.youtube.com/watch?v=6j4ofS0GT38&t=507s)
 
 ## 目录说明
@@ -72,7 +72,7 @@
 
 - 云编译框架：[haiibo/OpenWrt](https://github.com/haiibo/OpenWrt)
 - 参考项目：[laipeng668/openwrt-ci-roc](https://github.com/laipeng668/openwrt-ci-roc)
-- LibWrt / NSS：[LiBwrt/openwrt-6.x](https://github.com/LiBwrt/openwrt-6.x)
+- LibWrt / NSS：[LiBwrt/LibWrt](https://github.com/LiBwrt/LibWrt)
 
 ![Overview](Overview.png)
 ![Global](Global.png)

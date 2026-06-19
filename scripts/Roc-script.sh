@@ -30,12 +30,9 @@ sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "M
 # rm -rf feeds/luci/applications/luci-app-wechatpush
 # rm -rf feeds/luci/applications/luci-app-appfilter
 # rm -rf feeds/luci/applications/luci-app-watchcat
-rm -rf feeds/luci/applications/luci-app-frpc
-rm -rf feeds/luci/applications/luci-app-frps
 rm -rf feeds/luci/themes/luci-theme-argon
 # rm -rf feeds/packages/net/open-app-filter
 # rm -rf feeds/packages/net/ariang
-rm -rf feeds/packages/net/frp
 rm -rf feeds/packages/lang/golang
 # rm -rf feeds/packages/utils/watchcat
 
@@ -49,13 +46,8 @@ function git_sparse_clone() {
   cd .. && rm -rf $repodir
 }
 
-# General.config / IPQ60XX.config 已启用：frp、wolplus、argon、aurora、openclash
+# General.config / IPQ60XX.config 已启用：wolplus、argon、aurora、openclash；frp 使用 ImmortalWrt 官方 feeds
 # git_sparse_clone ariang https://github.com/laipeng668/packages net/ariang
-git_sparse_clone frp https://github.com/laipeng668/packages net/frp
-mv -f package/frp feeds/packages/net/frp
-git_sparse_clone frp https://github.com/laipeng668/luci applications/luci-app-frpc applications/luci-app-frps
-mv -f package/luci-app-frpc feeds/luci/applications/luci-app-frpc
-mv -f package/luci-app-frps feeds/luci/applications/luci-app-frps
 # git_sparse_clone openwrt-23.05 https://github.com/immortalwrt/packages utils/watchcat
 # mv -f package/watchcat feeds/packages/utils/watchcat
 # git_sparse_clone openwrt-23.05 https://github.com/immortalwrt/luci applications/luci-app-watchcat
